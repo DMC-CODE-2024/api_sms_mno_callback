@@ -2,8 +2,8 @@ package com.gl.ceir.config.configuration;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
