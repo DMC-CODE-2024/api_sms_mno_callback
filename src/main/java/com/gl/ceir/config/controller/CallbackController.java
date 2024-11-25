@@ -13,6 +13,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+
+import com.gl.ceir.config.service.AlertService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,8 @@ public class CallbackController {
 
     @Autowired
     CfgFeatureAlertRepository cfgFeatureAlertRepository;
+    @Autowired
+    AlertService alertService;
 
     @RequestMapping(path = {"/kanel"}, method = {RequestMethod.GET})
     public ResponseEntity<String> kanelCallback(@RequestParam(required = true) String myId, @RequestParam(required = true) String operatorName, @RequestParam(required = true) String answer, @RequestParam(required = true) int status, @RequestParam(required = true) Long dlrvTime) {
@@ -52,12 +56,9 @@ public class CallbackController {
             }
             return new ResponseEntity("OK", HttpStatus.OK);
         } catch (Exception e) {
-            logger.info("Exception in kanel callback api: " + e);
-            Optional<CfgFeatureAlert> alert = this.cfgFeatureAlertRepository.findByAlertId("alert1201");
             logger.error("Raising alert1207: Exception in " + operatorName + " callback-> " + e);
             System.out.println("Raising alert1207: Exception in " + operatorName + " callback-> " + e);
-            if (alert.isPresent())
-                raiseAnAlert(((CfgFeatureAlert)alert.get()).getAlertId(), operatorName, "SMS_MODULE", 0);
+            this.alertService.raiseAlert("alert1207", operatorName, Integer.valueOf(0));
             return new ResponseEntity("Request Failed. Please try again later", HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
@@ -79,27 +80,21 @@ public class CallbackController {
                         this.notificationRepository.save(noti);
                     }
                 } else {
-                    Optional<CfgFeatureAlert> optional = this.cfgFeatureAlertRepository.findByAlertId("alert1201");
                     logger.error("Raising alert1207: Exception in smart callback-> Unknown status: " + deliveryStatus);
                     System.out.println("Raising alert1207: Exception in smart callback-> Unknown status: " + deliveryStatus);
-                    if (optional.isPresent())
-                        raiseAnAlert(((CfgFeatureAlert)optional.get()).getAlertId(), "smart: Unknown status: " + deliveryStatus, "SMS_MODULE", 0);
+                    this.alertService.raiseAlert("alert1207", "smart: Unknown status: " + deliveryStatus, Integer.valueOf(0));
                 }
                 return new ResponseEntity("OK", HttpStatus.OK);
             }
-            Optional<CfgFeatureAlert> alert = this.cfgFeatureAlertRepository.findByAlertId("alert1201");
+
             logger.error("Raising alert1207: Exception in smart callback-> Delivery status not found or null");
             System.out.println("Raising alert1207: Exception in smart callback-> Delivery status not found or null");
-            if (alert.isPresent())
-                raiseAnAlert(((CfgFeatureAlert)alert.get()).getAlertId(), "smart: Delivery status not found or null", "SMS_MODULE", 0);
+            this.alertService.raiseAlert("alert1207", "smart: Delivery status not found or null", Integer.valueOf(0));
             return new ResponseEntity("Delivery status not found or null", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            logger.info("Exception in smart callback api: {}" + e);
-            Optional<CfgFeatureAlert> alert = this.cfgFeatureAlertRepository.findByAlertId("alert1201");
             logger.error("Raising alert1207: Exception in smart callback->" + e);
             System.out.println("Raising alert1207: Exception in smart callback->" + e);
-            if (alert.isPresent())
-                raiseAnAlert(((CfgFeatureAlert)alert.get()).getAlertId(), "smart", "SMS_MODULE", 0);
+            this.alertService.raiseAlert("alert1207", "smart", Integer.valueOf(0));
             return new ResponseEntity("Request Failed. Please try again later", HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
